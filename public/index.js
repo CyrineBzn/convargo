@@ -33,7 +33,7 @@ var deliveries = [{
   'options': {
     'deductibleReduction': false
   },
-  'price': 0,
+  'price':0,
   'commission': {
     'insurance': 0,
     'treasury': 0,
@@ -147,3 +147,97 @@ const actors = [{
 console.log(truckers);
 console.log(deliveries);
 console.log(actors);
+
+// First Step 
+
+function firstStep(){
+  deliveries.forEach(delivery=>{
+    truckers.forEach(truck=>{
+      if(truck.id==delivery.truckerId){
+        delivery.price=truck.pricePerKm * delivery.distance + truck.pricePerVolume * delivery.volume;
+      }
+    }) 
+  })
+}
+
+// Second Step
+
+function secondStep(){
+
+  deliveries.forEach(delivery=>{
+    truckers.forEach(truck=>{
+      if(truck.id==delivery.truckerId){
+        var pricevolume= truck.pricePerVolume * delivery.volume
+        
+        if ( delivery.volume >= 5 && delivery.volume < 10 )
+        {
+        delivery.price= delivery.price - pricevolume*0.1;
+        }
+        else if (delivery.volume >= 10 && delivery.volume < 25)
+        {
+          delivery.price=delivery.price -pricevolume*0.3;
+        }
+        else if(delivery.volume >= 25)
+        {
+          delivery.price= delivery.price - pricevolume*0.5;
+        }
+    } 
+  })    
+  }) 
+}
+
+// third step
+function thirdStep(){
+  deliveries.forEach(delivery=>{
+        var commission= delivery.price *0.3;
+        delivery.commission.insurance = commission/2;
+        delivery.commission.treasury= Math.floor((delivery.distance / 500)*1)+1;
+        delivery.commission.convargo= commission-(delivery.commission.insurance +delivery.commission.treasury);
+    }) 
+}
+
+// fourth step
+
+function fourthStep(){
+  deliveries.forEach(delivery=>{
+    if(delivery.options.deductibleReduction==true)
+    {
+      delivery.price=delivery.price + delivery.volume;
+    }
+  });
+}
+
+// Fifth Step
+
+function fifthStep()
+{
+  actors.forEach(actor=>{
+    deliveries.forEach(delivery=>{
+      if(delivery.id==actor.deliveryId){
+        actor.payment.forEach(person=>{
+          if (person.who=='shipper'){
+            person.amount=delivery.price;
+           }
+          else if(person.who=='trucker'){
+           person.amount=(delivery.price-delivery.volume)*0.7;
+          }
+          else if(person.who=='insurance'){
+            person.amount=delivery.commission.insurance;
+          }
+          else if( person.who =='treasury'){
+            person.amount=delivery.commission.treasury;
+          }
+          else if(person.who=='convargo'){
+            person.amount=delivery.price -(delivery.commission.insurance+ delivery.commission.treasury+ ((delivery.price-delivery.volume)*0.7));
+          }
+        })
+      }
+    })
+  })
+}
+
+firstStep();
+secondStep();
+thirdStep();
+fourthStep();
+fifthStep();
